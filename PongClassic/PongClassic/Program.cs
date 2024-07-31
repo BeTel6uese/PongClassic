@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Threading;
-
 
 namespace PongClassic
 {
@@ -28,6 +27,61 @@ namespace PongClassic
 
         static void Main(string[] args)
         {
+            ShowWelcomeMessage();
+            Console.ReadKey();
+
+            while (true)
+            {
+                RunGame();
+
+                Console.Clear();
+                Console.WriteLine("Game Over!");
+                Console.WriteLine($"Final Score - Left Player: {leftPlayerScore} | Right Player: {rightPlayerScore}");
+                Console.WriteLine("Press R to restart or any other key to exit...");
+
+                var key = Console.ReadKey();
+                if (key.Key != ConsoleKey.R)
+                {
+                    break;
+                }
+
+                ResetGame();
+            }
+        }
+
+        static void ShowWelcomeMessage()
+        {
+
+            string welcomeMessage = @"
+__        __   _                            _           ____   ___   _   _  ____      
+\ \      / /__| | ___ ___  _ __ ___   ___  | |_ ___    |  _ \ / _ \ | \ | |/ ___|
+ \ \ /\ / / _ \ |/ __/ _ \| '_ ` _ \ / _ \ | __/ _ \   | |_) | | | ||  \| | |  _ 
+  \ V  V /  __/ | (_| (_) | | | | | |  __/ | || (_) |  |  __/| |_| || . ` | |_| |
+   \_/\_/ \___|_|\___\___/|_| |_| |_|\___|  \__\___( ) |_|    \___/ |_| \_|\____|
+                                                   |/                  
+           ";
+
+            Console.Clear();
+            Console.WriteLine(welcomeMessage);
+            Console.WriteLine("Press any key to play...");
+            DrawGameBoard();
+        }
+
+        static void DrawGameBoard()
+        {
+            Console.SetCursorPosition(0, 7);
+            for (int y = 0; y < screenHeight; y++)
+            {
+                for (int x = 0; x < screenWidth; x++)
+                {
+                    Console.Write(screenBuffer[y, x]);
+                }
+                Console.WriteLine();
+            }
+        }
+
+        static void RunGame()
+        {
             bool gameOver = false;
 
             while (!gameOver)
@@ -36,7 +90,7 @@ namespace PongClassic
                 UpdateBall();
                 RenderScreen();
 
-                Thread.Sleep(50);
+                Thread.Sleep(80);
 
                 // Check for game over condition
                 if (leftPlayerScore >= 10 || rightPlayerScore >= 10)
@@ -44,24 +98,20 @@ namespace PongClassic
                     gameOver = true;
                 }
             }
+        }
 
+        static void ResetGame()
+        {
+            leftPlayerScore = 0;
+            rightPlayerScore = 0;
+            leftPaddleY = 8;
+            rightPaddleY = 8;
+            ballX = screenWidth / 2;
+            ballY = screenHeight / 2;
+            ballDirX = 1;
+            ballDirY = 1;
+            ResetScreenBuffers();
             Console.Clear();
-            Console.WriteLine("Game Over!");
-            Console.WriteLine($"Final Score - Left Player: {leftPlayerScore} | Right Player: {rightPlayerScore}");
-            Console.WriteLine("Press R to restart or any other key to exit...");
-
-            var key = Console.ReadKey();
-            if (key.Key == ConsoleKey.R)
-            {
-                // Reset the game
-                leftPlayerScore = 0;
-                rightPlayerScore = 0;
-                ballX = screenWidth / 2;
-                ballY = screenHeight / 2;
-                ballDirX = 1;
-                ballDirY = 1;
-                Main(args);
-            }
         }
 
         static void HandleInput()
@@ -77,7 +127,7 @@ namespace PongClassic
                         if (leftPaddleY > 1) leftPaddleY--;
                         break;
                     case ConsoleKey.S:
-                        if (leftPaddleY < screenHeight - paddleHeight - 1) leftPaddleY++; 
+                        if (leftPaddleY < screenHeight - paddleHeight - 1) leftPaddleY++;
                         break;
 
                     //player 2
@@ -85,7 +135,7 @@ namespace PongClassic
                         if (rightPaddleY > 1) rightPaddleY--;
                         break;
                     case ConsoleKey.DownArrow:
-                        if (rightPaddleY < screenHeight - paddleHeight - 1) rightPaddleY++; 
+                        if (rightPaddleY < screenHeight - paddleHeight - 1) rightPaddleY++;
                         break;
                 }
             }
@@ -133,6 +183,18 @@ namespace PongClassic
             ballDirX = -ballDirX; // Send the ball in the opposite direction
         }
 
+        static void ResetScreenBuffers()
+        {
+            for (int y = 0; y < screenHeight; y++)
+            {
+                for (int x = 0; x < screenWidth; x++)
+                {
+                    screenBuffer[y, x] = ' ';
+                    previousScreenBuffer[y, x] = ' ';
+                }
+            }
+        }
+
         static void RenderScreen()
         {
             // Clear the screen buffer
@@ -178,7 +240,7 @@ namespace PongClassic
                 {
                     if (screenBuffer[y, x] != previousScreenBuffer[y, x])
                     {
-                        Console.SetCursorPosition(x, y);
+                        Console.SetCursorPosition(x, y + 8);
                         Console.Write(screenBuffer[y, x]);
                         previousScreenBuffer[y, x] = screenBuffer[y, x];
                     }
@@ -186,7 +248,7 @@ namespace PongClassic
             }
 
             // Display scores
-            Console.SetCursorPosition(0, screenHeight);
+            Console.SetCursorPosition(0, screenHeight + 8);
             Console.WriteLine($"Left Player: {leftPlayerScore} | Right Player: {rightPlayerScore}");
         }
     }
